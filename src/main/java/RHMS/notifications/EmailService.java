@@ -7,8 +7,8 @@ import jakarta.mail.internet.*;
 public class EmailService {
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
-    private static final String EMAIL_USERNAME = "rayyanaiza74@gmail.com"; // Replace with your email
-    private static final String EMAIL_PASSWORD = "wkhpprcflfhbemnj"; // Replace with your app password
+    private static final String EMAIL_USERNAME = "your.email@gmail.com"; // Replace with your email
+    private static final String EMAIL_PASSWORD = "your_app_password"; // Replace with your app password
 
     public static void sendEmergencyEmail(String toEmail, String patientId, String patientName, String reason) {
         Properties props = new Properties();

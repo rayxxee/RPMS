@@ -134,3 +134,28 @@ The application uses serialized files for data storage:
 - Data is stored locally with appropriate access controls
 - Regular backups are recommended
 
+## Email Configuration
+
+To set up email notifications in the application:
+
+1. **Gmail Setup (Recommended)**
+   - Use a Gmail account for sending notifications
+   - Enable 2-Step Verification in your Google Account
+   - Generate an App Password:
+     1. Go to your Google Account settings
+     2. Navigate to Security
+     3. Under "2-Step Verification", click on "App passwords"
+     4. Select "Mail" and your device
+     5. Copy the generated 16-character password
+
+2. **Configure Email Settings**
+   - Open `src/main/java/RHMS/notifications/EmailService.java`
+   - Replace `your.email@gmail.com` with your Gmail address
+   - Replace `your_app_password` with the generated App Password
+   - Do the same for `src/main/java/RHMS/notifications/EmailNotification.java`
+
+3. **Important Security Notes**
+   - Never commit your email credentials to version control
+   - Keep your App Password secure and don't share it
+   - If you suspect your App Password is compromised, revoke it immediately and generate a new one
+

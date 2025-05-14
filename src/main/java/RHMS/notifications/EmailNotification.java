@@ -6,8 +6,8 @@ import java.util.Properties;
 
 public class EmailNotification {
     public static void sendEmail(String recipientEmail, String message) {
-        final String senderEmail = "rayyanaiza74@gmail.com"; // Replace with your email
-        final String senderPassword = "pbveuwxbnheuzmqj"; // Replace with your app password
+        final String senderEmail = "your.email@gmail.com"; // Replace with your email
+        final String senderPassword = "your_app_password"; // Replace with your app password
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
