@@ -1,0 +1,70 @@
+.root {
+    -fx-background-color: #f5f5f5cc;
+    -fx-font-family: "Arial";
+}
+
+.button {
+    -fx-background-radius: 5;
+    -fx-padding: 10 20;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.button:hover {
+    -fx-opacity: 0.9;
+}
+
+.text-field, .password-field {
+    -fx-background-radius: 5;
+    -fx-padding: 10;
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #2196F3;
+}
+
+.combo-box {
+    -fx-background-radius: 5;
+    -fx-padding: 5;
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+}
+
+.label {
+    -fx-font-size: 14px;
+}
+
+.vbox {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.alert {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+}
+
+.alert .header-panel {
+    -fx-background-color: #2196F3;
+}
+
+.alert .header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.logo {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+} 

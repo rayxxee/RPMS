@@ -1,0 +1,181 @@
+package RHMS.gui;
+
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import RHMS.usermanagement.UserManager;
+import RHMS.usermanagement.Patient;
+import RHMS.usermanagement.Doctor;
+import RHMS.usermanagement.User;
+import RHMS.healthdata.Vitals;
+import RHMS.healthdata.VitalsDatabase;
+import RHMS.emergency.EmergencyAlert;
+import RHMS.appointments.Appointment;
+import RHMS.appointments.AppointmentManager;
+import RHMS.communication.ChatClient;
+import RHMS.communication.ChatServer;
+import RHMS.communication.VideoCall;
+import RHMS.interaction.Feedback;
+import RHMS.interaction.FeedbackManager;
+import RHMS.notifications.ReminderService;
+import RHMS.reporting.ReportGenerator;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.web.WebView;
+import javafx.scene.web.WebEngine;
+import javafx.concurrent.Worker;
+import javafx.scene.control.ProgressIndicator;
+import java.io.File;
+
+public class RHMSApplication extends Application {
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Remote Health Monitoring System");
+        showLoginScreen(primaryStage);
+    }
+
+    private void showAlert(String title, String content, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    private void showFeedbackDialog(Doctor doctor, Appointment appointment) {
+        Dialog<Feedback> dialog = new Dialog<>();
+        dialog.setTitle("Add Feedback");
+        dialog.setHeaderText("Add feedback for appointment");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+        grid.setStyle("-fx-background-color: #F6F6F2;");
+
+        TextArea feedbackArea = new TextArea();
+        feedbackArea.setPromptText("Enter feedback");
+        feedbackArea.setPrefRowCount(5);
+        feedbackArea.setWrapText(true);
+
+        TextArea prescriptionArea = new TextArea();
+        prescriptionArea.setPromptText("Enter prescription");
+        prescriptionArea.setPrefRowCount(5);
+        prescriptionArea.setWrapText(true);
+
+        grid.add(new Label("Feedback:"), 0, 0);
+        grid.add(feedbackArea, 1, 0);
+        grid.add(new Label("Prescription:"), 0, 1);
+        grid.add(prescriptionArea, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType submitButtonType = new ButtonType("Submit", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(submitButtonType, ButtonType.CANCEL);
+        dialog.getDialogPane().setStyle("-fx-background-color: #F6F6F2;");
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == submitButtonType) {
+                String feedback = feedbackArea.getText();
+                String prescription = prescriptionArea.getText();
+                if (!feedback.isEmpty()) {
+                    return new Feedback(appointment.getPatientId(), doctor.getId(), feedback, prescription, appointment.getAppointmentId());
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(feedback -> {
+            try {
+                FeedbackManager.addFeedback(feedback);
+                showAlert("Success", "Feedback added successfully!", Alert.AlertType.INFORMATION);
+            } catch (Exception ex) {
+                showAlert("Error", "Failed to add feedback: " + ex.getMessage(), Alert.AlertType.ERROR);
+            }
+        });
+    }
+
+    private void showVideoCallWindow(String meetingLink) {
+        Stage videoStage = new Stage();
+        videoStage.setTitle("Video Call");
+        videoStage.setWidth(800);
+        videoStage.setHeight(600);
+
+        WebView webView = new WebView();
+        WebEngine webEngine = webView.getEngine();
+
+        // Handle JavaScript alerts
+        webEngine.setOnAlert(event -> {
+            showAlert("Video Call", event.getData(), Alert.AlertType.INFORMATION);
+        });
+
+        // Handle JavaScript errors
+        webEngine.setOnError(event -> {
+            showAlert("Error", "Failed to load video call: " + event.getMessage(), Alert.AlertType.ERROR);
+        });
+
+        // Configure WebView for modern browser features
+        webEngine.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        webEngine.getSettings().setJavaScriptEnabled(true);
+        webEngine.getSettings().setUserDataDirectory(new File(System.getProperty("java.io.tmpdir"), "webview"));
+
+        // Load the meeting link
+        webEngine.load(meetingLink);
+
+        // Handle window close
+        videoStage.setOnCloseRequest(e -> {
+            webEngine.executeScript(
+                "const tracks = document.querySelectorAll('video, audio');" +
+                "tracks.forEach(track => {" +
+                "    if (track.srcObject) {" +
+                "        track.srcObject.getTracks().forEach(t => t.stop());" +
+                "    }" +
+                "});"
+            );
+        });
+
+        Scene scene = new Scene(webView);
+        videoStage.setScene(scene);
+        videoStage.show();
+    }
+
+    // ... rest of the existing methods ...
+
+    public static void main(String[] args) {
+        // Start the chat server in a separate thread
+        new Thread(() -> {
+            try {
+                ChatServer server = new ChatServer(1234);
+                server.start();
+            } catch (Exception e) {
+                System.err.println("Failed to start chat server: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }).start();
+
+        // Load feedbacks
+        try {
+            FeedbackManager.loadFeedbacks();
+        } catch (Exception e) {
+            System.err.println("Failed to load feedbacks: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        launch(args);
+    }
+} 
