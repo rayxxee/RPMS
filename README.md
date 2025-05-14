@@ -36,7 +36,7 @@ A comprehensive JavaFX-based application for managing remote patient monitoring,
 
 1. Clone the repository:
    ```bash
-   git clone [repository-url]
+   git clone https://github.com/rayxxee/RPMS.git
    cd RPMS
    ```
 
